@@ -1,0 +1,8 @@
+export function renderGpaChart(series) {
+ const left=48,right=620,top=18,bottom=205,width=right-left,height=bottom-top;
+ const points=series.map((item,index)=>({ ...item,x:left+(series.length===1?width/2:index*width/(series.length-1)),y:bottom-(item.gpa/10)*height }));
+ const lines=[0,2,4,6,8,10].map(v=>{const y=bottom-(v/10)*height;return `<g class="gpa-grid"><line x1="${left}" y1="${y}" x2="${right}" y2="${y}"/><text x="${left-10}" y="${y+3}" text-anchor="end">${v}</text></g>`}).join('');
+ const path=points.map((p,i)=>`${i?'L':'M'}${p.x},${p.y}`).join(' ');
+ const dots=points.map(p=>`<g class="gpa-point ${p.number===3?'best':''}" tabindex="0" role="img" aria-label="${p.label}: ${p.gpa.toFixed(2)} out of 10"><title>${p.label}: ${p.gpa.toFixed(2)} / 10</title><circle cx="${p.x}" cy="${p.y}" r="6"/><text class="gpa-value" x="${p.x}" y="${p.y-13}" text-anchor="middle">${p.gpa.toFixed(2)}</text><text class="gpa-label" x="${p.x}" y="${bottom+22}" text-anchor="middle">Semester ${p.number}</text></g>`).join('');
+ return `<figure class="gpa-chart"><figcaption><strong>GPA by semester</strong><span>Scale 0–10</span></figcaption><svg viewBox="0 0 660 250" role="img" aria-labelledby="gpa-title gpa-desc" preserveAspectRatio="xMidYMid meet"><title id="gpa-title">Semester GPA progression</title><desc id="gpa-desc">GPA rose from 8.48 in Semester 1 to a high of 9.04 in Semester 3, then was 9.00 in Semester 4.</desc>${lines}<path class="gpa-line" d="${path}"/>${dots}</svg><div class="table-scroll"><table><caption class="visually-hidden">Semester GPA values</caption><thead><tr><th>Semester</th><th>GPA</th></tr></thead><tbody>${points.map(p=>`<tr><td>${p.label}</td><td>${p.gpa.toFixed(2)} / 10</td></tr>`).join('')}</tbody></table></div></figure>`;
+}
