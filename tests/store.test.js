@@ -8,7 +8,7 @@ globalThis.localStorage = {
 };
 globalThis.innerWidth = 1280;
 globalThis.innerHeight = 800;
-const { state, rememberRecentItem, openWindow, updatePreferences } = await import('../src/core/store.js');
+const { state, rememberRecentItem, openWindow, closeWindow, updatePreferences } = await import('../src/core/store.js');
 const { applications } = await import('../src/apps/registry.js');
 
 test('recent portfolio items are deduplicated and persisted in local preferences', () => {
@@ -32,4 +32,18 @@ test('grid icon positions are persisted as preferences', () => {
   state.preferences = {};
   updatePreferences({ iconPositions: { academics: { col: 2, row: 1 } } });
   assert.deepEqual(JSON.parse(entries.get('harshit-os')).iconPositions, { academics: { col: 2, row: 1 } });
+});
+
+test('closing an application clears only its desktop icon selection', () => {
+  state.windows = [];
+  state.activeId = null;
+  state.selectedIcon = null;
+  const about = openWindow('about', applications);
+  const github = openWindow('github', applications);
+  state.selectedIcon = 'about';
+  closeWindow(github.id);
+  assert.equal(state.selectedIcon, 'about');
+  assert.ok(state.windows.some(window => window.appId === 'about'));
+  closeWindow(about.id);
+  assert.equal(state.selectedIcon, null);
 });
